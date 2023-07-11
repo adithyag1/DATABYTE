@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="cards.css">
+    <title>Cards Game</title>
+</head>
+<body>
+    <form id="nameform">
+        <label for="name">Enter your name: 
+            <input id="name" pattern="^[A-Za-z0-9]+$" placeholder="alphanumeric" required>
+            <input type="submit">
+        </label>
+    </form>
+    <button id="view-lb">🏆</button></div>
+    <div class="leaderboard">
+    </div>
+    <div class="wrapper">
+        <div class="top">
+            <div class="score">🎯:0</div>
+            <div><button class="startbtn">Start</button></div>
+            <div class="time">⏰:60</div>
+        </div>
+        <div class="grid"></div>
+    </div>
+    <script src="cards.js"></script>
+</body>
+</html>
