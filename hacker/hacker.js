@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded",function(){
     let started=false;
     let time=60;
     let score=0;
+    let wobonus=0;
     let timeinterval;
     let orders=[];``
     let clickok=true;
@@ -24,6 +25,16 @@ document.addEventListener("DOMContentLoaded",function(){
     let cols;
     let paused=false;
     let leaderboard;
+    let cards;
+    let submitted=false;
+
+    leaderboard=JSON.parse(localStorage.getItem("leaderboard"))||{};
+        
+    Object.keys(leaderboard)
+    .sort((a,b)=>leaderboard[b]-leaderboard[a])
+    .forEach(key=>{
+        sorted[key] = leaderboard[key];
+    });
 
     let lbhtm=`<table border><tr><th>Name</th><th>Score</th></tr>`;
     for(const [name,score] of Object.entries(sorted)){
@@ -35,81 +46,81 @@ document.addEventListener("DOMContentLoaded",function(){
 
     nameform.addEventListener("submit",function(event){
         event.preventDefault();
-        playername=document.getElementById("name").value;
-        rows=document.getElementById("rows").value||6;
-        cols=document.getElementById("cols").value||6;
-        console.log("sumbit clicked:::rows:::",rows,":::cols:::",cols);
-        while(orders.length<rows*cols){
-            let ran=Math.floor(Math.random()*rows*cols+1);
-            if(!orders.includes(ran)) orders.push(ran);
-        }
-
-        leaderboard=JSON.parse(localStorage.getItem("leaderboard"))||{};
-        
-        Object.keys(leaderboard)
-        .sort((a,b)=>leaderboard[b]-leaderboard[a])
-        .forEach(key=>{
-            sorted[key] = leaderboard[key];
-        });
-
-        let htm="";
-        htm+=`<div class="card" data-id="100">
-                <div class="front" style="font-size: calc(75vmin/10); color:white;">➕</div>
-                <div class="back" style="font-size: calc(75vmin/6);">?</div>
-            </div>`
-        htm+=`<div class="card" data-id="101">
-                <div class="front" style="font-size: calc(75vmin/10); color:white;">⏰</div>
-                <div class="back" style="font-size: calc(75vmin/6);">?</div>
-            </div>`
-        
-        console.log("---",rows*cols,"---");
-        for(let i=2; i<Math.min(rows*cols,36);i++){
-            if(i===rows*cols-1&&rows*cols%2===1){
-                htm+=`<div class="card" data-id="99">
-                    <div class="front" style="font-size: calc(75vmin/10); color:white;"></div>
-                    <div class="back" style="font-size: calc(75vmin/6);">?</div>
-                </div>`;
+        if(!started){
+            playername=document.getElementById("name").value;
+            rows=document.getElementById("rows").value||6;
+            cols=document.getElementById("cols").value||6;
+            while(orders.length<rows*cols){
+                let ran=Math.floor(Math.random()*rows*cols+1);
+                if(!orders.includes(ran)) orders.push(ran);
             }
-            else{
-                htm+=`<div class="card" data-id="${Math.floor(i/2)}">
-                        <div class="front" style="font-size: 400%; color:white;">${emojis[Math.floor(i/2)-1]}</div>
-                        <div class="back" style="font-size: calc(75vmin/6);">?</div>
+    
+            let htm="";
+            htm+=`<div class="card" data-id="100">
+                    <div class="front" style="font-size: ${Math.min(75/rows,75/cols)}vmin;">➕</div>
+                    <div class="back" style="font-size: ${Math.min(75/rows,75/cols)}vmin;">?</div>
+                </div>`
+            htm+=`<div class="card" data-id="101">
+                    <div class="front" style="font-size: ${Math.min(75/rows,75/cols)}vmin;">⏰</div>
+                    <div class="back" style="font-size: ${Math.min(75/rows,75/cols)}vmin;">?</div>
+                </div>`
+            
+            for(let i=2; i<Math.min(rows*cols,36);i++){
+                if(i===rows*cols-1&&rows*cols%2===1){
+                    htm+=`<div class="card" data-id="99">
+                        <div class="front" style="font-size: ${Math.min(75/rows,75/cols)}vmin;"></div>
+                        <div class="back" style="font-size: ${Math.min(75/rows,75/cols)}vmin;">?</div>
+                    </div>`;
+                }
+                else{
+                    htm+=`<div class="card" data-id="${Math.floor(i/2)}">
+                            <div class="front" style="font-size: ${Math.min(75/rows,75/cols)}vmin;">${emojis[Math.floor(i/2)-1]}</div>
+                            <div class="back" style="font-size: ${Math.min(75/rows,75/cols)}vmin;">?</div>
+                        </div>`;
+                }
+            }
+            for(let i=34;i<rows*cols-2;i++){
+                htm+=`<div class="card" data-id="99">
+                        <div class="front" style="font-size: ${Math.min(75/rows,75/cols)}vmin;"></div>
+                        <div class="back" style="font-size: ${Math.min(75/rows,75/cols)}vmin;">?</div>
                     </div>`;
             }
+            grid.innerHTML=htm;
+            grid.style.height=`75vmin`;
+            grid.style.width=`75vmin`;
+            cards=document.querySelectorAll(".card");
+            let ord=0;
+            cards.forEach((card)=>{
+                card.addEventListener("click",flipfn);
+                card.style.order=orders[ord++];
+                card.style.height=`${75/rows}vmin`;
+                card.style.width=`${75/cols}vmin`;
+            });
+            
         }
-        for(let i=34;i<rows*cols-2;i++){
-            htm+=`<div class="card" data-id="99">
-                    <div class="front" style="font-size: calc(75vmin/10); color:white;"></div>
-                    <div class="back" style="font-size: calc(75vmin/6);">?</div>
-                </div>`;
-        }
-        grid.innerHTML=htm;
-        grid.style.height=`75vmin`;
-        grid.style.width=`75vmin`;
-        const cards=document.querySelectorAll(".card");
-        let ord=0;
-        cards.forEach((card)=>{
-            card.addEventListener("click",flipfn);
-            card.style.order=orders[ord++];
-            card.style.height=`${75/rows}vmin`;
-            card.style.width=`${75/cols}vmin`;
-        });
+        else return;
     });
 
     function gameover(num){
         if(playername in leaderboard) leaderboard[playername]=Math.max(score,leaderboard[playername]);
         else leaderboard[playername]=score;
         localStorage.setItem("leaderboard",JSON.stringify(leaderboard));
-        switch(num){
-            case 1:
-                alert(`Congratulations! You win.\nTime taken: ${60-time}s`);
-                break;
-            case 0:
-                alert(`Time Up! Your score:${score}`);
-                break;
-        }
-        clearInterval(timeinterval);
-        location.reload();
+        cards.forEach(card => {
+            card.classList.add("flip");
+        });
+        setTimeout(() => {
+            switch(num){
+                case 1:
+                    alert(`Congratulations! You win.\nTime taken: ${60-time}s`);
+                    break;
+                case 0:
+                    alert(`Time Up! Your score:${score}`);
+                    break;
+            }
+            clearInterval(timeinterval);
+            location.reload();
+            
+        }, 500);
     }
 
     function shuffle(){
@@ -118,11 +129,8 @@ document.addEventListener("DOMContentLoaded",function(){
             [orders[i],orders[randomIndex]]=[orders[randomIndex],orders[i]];
         }
         let x=0;
-
-        
-        const cards=document.querySelectorAll(".card");
         cards.forEach((card)=>{
-            if(!card.classList.contains("locked")) card.style.order = orders[x++];
+            if(!card.classList.contains("locked")&&!card.classList.contains("dummy")) card.style.order = orders[x++];
         });
     }
   
@@ -136,28 +144,40 @@ document.addEventListener("DOMContentLoaded",function(){
 
             if(this.dataset.id==="99"){
                 this.removeEventListener("click",flipfn);
-                setTimeout(() => {
-                    this.classList.remove("flip");
-                }, 500);
+                this.classList.add("dummy");
+                for(let i=0;i<orders.length;i++){
+                    if(!(orders[i]-this.style.order)){
+                        orders.splice(i--,1);
+                    }
+                }
                 return;
             }
+
             else if(this.dataset.id==="100"){
                 score+=2;
-                shuffle();
                 scorediv.innerHTML=`🎯:${score}`;
-                setTimeout(() => {
+                clickok=false;
+                setTimeout(()=> {
                     this.classList.remove("flip");
+                    setTimeout(()=>{
+                        shuffle();
+                        clickok=true;
+                    },300);
                 }, 500);
                 return;
             }              
             else if(this.dataset.id==="101"){
-                setTimeout(() => {
+                clickok=false;
+                setTimeout(()=> {
                     this.classList.remove("flip");
+                    setTimeout(()=>{
+                        shuffle();
+                        clickok=true;
+                    },300);
                 }, 500);
-                if(!paused){
+                if(!paused&&time){
                     paused=true;
                     clearInterval(timeinterval);
-                    shuffle();
                     setTimeout(() => {
                         timeinterval=setInterval(()=>{
                         if(--time<0) return gameover(0);
@@ -173,6 +193,7 @@ document.addEventListener("DOMContentLoaded",function(){
             if(!flipped){
                 flipped=true;
                 card1=this;
+                card1.classList.add("locked");
                 return;
             }
 
@@ -194,7 +215,8 @@ document.addEventListener("DOMContentLoaded",function(){
                         }
                     }
                     scorediv.innerHTML=`🎯:${++score}`;
-                    if(score===16){
+                    wobonus++;
+                    if(wobonus>=Math.min(Math.floor((rows*cols-2)/2),17)){
                         setTimeout(()=>{
                             return gameover(1);
                         },500);
@@ -205,6 +227,7 @@ document.addEventListener("DOMContentLoaded",function(){
             }
             else{
                 clickok=false;
+                card1.classList.remove("locked");
                 setTimeout(()=>{
                     card1.classList.remove("flip");
                     card2.classList.remove("flip");
