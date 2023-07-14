@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded",function(){
     const viewlb=document.getElementById("view-lb");
     const wrapper=document.querySelector(".wrapper");
     const lboard=document.querySelector(".leaderboard");
-    const emojis=["😁", "❤️", "👑", "👩🏽‍💻", "🌸", "🌏", "🍎", "💎", "☀️", "🌙", "⭐", "🔍", "📚", "💧", "📱", "🦁", "📷"];
+    const emojis=["😁", "❤️", "👑", "👩🏽‍💻", "🌸", "🌏", "🍎", "💎", "☀️", "🌙", "⭐", "🔍", "📚", "💧", "📱", "🦁", "📷", "😎", "🔥", "✨", "🦋", "💄", "🐮", "⛰️", "🍇", "💛", "🖋️","🌵"];
     const nameform=document.getElementById("nameform");
     
     let flipped=false;
@@ -17,6 +17,7 @@ document.addEventListener("DOMContentLoaded",function(){
     let score=0;
     let wobonus=0;
     let timeinterval;
+    let pausetimeout;
     let orders=[];``
     let clickok=true;
     let playername="";
@@ -26,7 +27,7 @@ document.addEventListener("DOMContentLoaded",function(){
     let paused=false;
     let leaderboard;
     let cards;
-    let submitted=false;
+    let real,magic,dummy,bad=0;
 
     leaderboard=JSON.parse(localStorage.getItem("leaderboard"))||{};
         
@@ -43,7 +44,6 @@ document.addEventListener("DOMContentLoaded",function(){
     lbhtm+=`</table>`;
     lboard.innerHTML=lbhtm;
 
-
     nameform.addEventListener("submit",function(event){
         event.preventDefault();
         if(!started){
@@ -54,36 +54,59 @@ document.addEventListener("DOMContentLoaded",function(){
                 let ran=Math.floor(Math.random()*rows*cols+1);
                 if(!orders.includes(ran)) orders.push(ran);
             }
+            const difficulty=document.getElementById("difficulty").value;
+            switch(difficulty){
+                case "easy":
+                    real=Math.floor(rows*cols*0.8);
+                    magic=Math.floor(rows*cols*0.15);
+                    break;
+                case "medium":
+                    real=Math.floor(rows*cols*0.85);
+                    magic=Math.floor(rows*cols*0.1);
+                    break;
+                case "hard":
+                    real=Math.floor(rows*cols*0.8);
+                    magic=Math.floor(rows*cols*0.1);
+                    bad=2;
+                    break;
+            }
+            real=real%2?real-1:real;
+            magic=magic>=2?magic:2;
+            magic=magic%2?magic-1:magic;
+            dummy=rows*cols-real-magic-bad;
     
             let htm="";
-            htm+=`<div class="card" data-id="100">
-                    <div class="front" style="font-size: ${Math.min(75/rows,75/cols)}vmin;">➕</div>
-                    <div class="back" style="font-size: ${Math.min(75/rows,75/cols)}vmin;">?</div>
-                </div>`
-            htm+=`<div class="card" data-id="101">
-                    <div class="front" style="font-size: ${Math.min(75/rows,75/cols)}vmin;">⏰</div>
-                    <div class="back" style="font-size: ${Math.min(75/rows,75/cols)}vmin;">?</div>
-                </div>`
-            
-            for(let i=2; i<Math.min(rows*cols,36);i++){
-                if(i===rows*cols-1&&rows*cols%2===1){
-                    htm+=`<div class="card" data-id="99">
-                        <div class="front" style="font-size: ${Math.min(75/rows,75/cols)}vmin;"></div>
-                        <div class="back" style="font-size: ${Math.min(75/rows,75/cols)}vmin;">?</div>
-                    </div>`;
-                }
-                else{
-                    htm+=`<div class="card" data-id="${Math.floor(i/2)}">
-                            <div class="front" style="font-size: ${Math.min(75/rows,75/cols)}vmin;">${emojis[Math.floor(i/2)-1]}</div>
-                            <div class="back" style="font-size: ${Math.min(75/rows,75/cols)}vmin;">?</div>
-                        </div>`;
-                }
+            for(let i=0;i<magic;i+=2){
+                htm+=`<div class="card" data-id="100">
+                        <div class="front" style="font-size: ${0.9*Math.min(75/rows,75/cols)}vmin; background-color: lightgreen;">➕</div>
+                        <div class="back" style="font-size: ${0.9*Math.min(75/rows,75/cols)}vmin;">?</div>
+                    </div>`
+                htm+=`<div class="card" data-id="101">
+                        <div class="front" style="font-size: ${0.9*Math.min(75/rows,75/cols)}vmin;  background-color: lightgreen;">⏰</div>
+                        <div class="back" style="font-size: ${0.9*Math.min(75/rows,75/cols)}vmin;">?</div>
+                    </div>`    
             }
-            for(let i=34;i<rows*cols-2;i++){
-                htm+=`<div class="card" data-id="99">
-                        <div class="front" style="font-size: ${Math.min(75/rows,75/cols)}vmin;"></div>
-                        <div class="back" style="font-size: ${Math.min(75/rows,75/cols)}vmin;">?</div>
+            for(let i=2; i<real+2;i++){
+                htm+=`<div class="card" data-id="${Math.floor(i/2)}">
+                        <div class="front" style="font-size: ${0.9*Math.min(75/rows,75/cols)}vmin;">${emojis[Math.floor(i/2)-1]}</div>
+                        <div class="back" style="font-size: ${0.9*Math.min(75/rows,75/cols)}vmin;">?</div>
                     </div>`;
+            }
+            for(let i=0;i<dummy;i++){
+                htm+=`<div class="card" data-id="99">
+                        <div class="front" style="font-size: ${0.9*Math.min(75/rows,75/cols)}vmin;"></div>
+                        <div class="back" style="font-size: ${0.9*Math.min(75/rows,75/cols)}vmin;">?</div>
+                    </div>`;
+            }
+            for(let i=0;i<bad;i+=2){
+                htm+=`<div class="card" data-id="102">
+                        <div class="front" style="font-size: ${0.9*Math.min(75/rows,75/cols)}vmin; background-color: red;">➕</div>
+                        <div class="back" style="font-size: ${0.9*Math.min(75/rows,75/cols)}vmin;">?</div>
+                    </div>`
+                htm+=`<div class="card" data-id="103">
+                        <div class="front" style="font-size: ${0.9*Math.min(75/rows,75/cols)}vmin;  background-color: red;">⏰</div>
+                        <div class="back" style="font-size: ${0.9*Math.min(75/rows,75/cols)}vmin;">?</div>
+                    </div>`    
             }
             grid.innerHTML=htm;
             grid.style.height=`75vmin`;
@@ -96,18 +119,21 @@ document.addEventListener("DOMContentLoaded",function(){
                 card.style.height=`${75/rows}vmin`;
                 card.style.width=`${75/cols}vmin`;
             });
-            
         }
         else return;
     });
 
     function gameover(num){
+        clearInterval(timeinterval);
         if(playername in leaderboard) leaderboard[playername]=Math.max(score,leaderboard[playername]);
         else leaderboard[playername]=score;
         localStorage.setItem("leaderboard",JSON.stringify(leaderboard));
-        cards.forEach(card => {
-            card.classList.add("flip");
-        });
+        setTimeout(() => {
+            cards.forEach(card => {
+                this.removeEventListener("click",flipfn);
+                card.classList.add("flip");
+            });            
+        }, 501);
         setTimeout(() => {
             switch(num){
                 case 1:
@@ -117,10 +143,9 @@ document.addEventListener("DOMContentLoaded",function(){
                     alert(`Time Up! Your score:${score}`);
                     break;
             }
-            clearInterval(timeinterval);
             location.reload();
             
-        }, 500);
+        }, 1002);
     }
 
     function shuffle(){
@@ -130,12 +155,12 @@ document.addEventListener("DOMContentLoaded",function(){
         }
         let x=0;
         cards.forEach((card)=>{
-            if(!card.classList.contains("locked")&&!card.classList.contains("dummy")) card.style.order = orders[x++];
+            if(!card.classList.contains("locked")) card.style.order = orders[x++];
         });
     }
   
     function flipfn(){
-        if(started&&clickok){
+        if(started&&clickok&&time){
 
             if(this===card1) return;
             if(card1&&card2) return;
@@ -144,7 +169,7 @@ document.addEventListener("DOMContentLoaded",function(){
 
             if(this.dataset.id==="99"){
                 this.removeEventListener("click",flipfn);
-                this.classList.add("dummy");
+                this.classList.add("locked");
                 for(let i=0;i<orders.length;i++){
                     if(!(orders[i]-this.style.order)){
                         orders.splice(i--,1);
@@ -154,7 +179,8 @@ document.addEventListener("DOMContentLoaded",function(){
             }
 
             else if(this.dataset.id==="100"){
-                score+=2;
+                if(bad) score+=2;
+                else score++;
                 scorediv.innerHTML=`🎯:${score}`;
                 clickok=false;
                 setTimeout(()=> {
@@ -178,7 +204,7 @@ document.addEventListener("DOMContentLoaded",function(){
                 if(!paused&&time){
                     paused=true;
                     clearInterval(timeinterval);
-                    setTimeout(() => {
+                    pausetimeout=setTimeout(() => {
                         timeinterval=setInterval(()=>{
                         if(--time<0) return gameover(0);
                         timediv.innerHTML=`⏰:${time}`;
@@ -186,7 +212,43 @@ document.addEventListener("DOMContentLoaded",function(){
                         paused=false;
                     },5000);
                 }
+                else if(paused){
+                    clearTimeout(pausetimeout);
+                    pausetimeout=setTimeout(() => {
+                        timeinterval=setInterval(()=>{
+                        if(--time<0) return gameover(0);
+                        timediv.innerHTML=`⏰:${time}`;
+                        },1000);
+                        paused=false;
+                    },5000);
 
+                }
+                return;
+            }
+
+            else if(this.dataset.id==="102"){
+                if(score) score--;
+                scorediv.innerHTML=`🎯:${score}`;
+                clickok=false;
+                setTimeout(()=> {
+                    this.classList.remove("flip");
+                    setTimeout(()=>{
+                        shuffle();
+                        clickok=true;
+                    },300);
+                }, 500);
+                return;
+            }              
+            else if(this.dataset.id==="103"){
+                clickok=false;
+                setTimeout(()=> {
+                    this.classList.remove("flip");
+                    setTimeout(()=>{
+                        shuffle();
+                        clickok=true;
+                    },300);
+                }, 500);
+                time-=3;
                 return;
             }
 
@@ -216,7 +278,7 @@ document.addEventListener("DOMContentLoaded",function(){
                     }
                     scorediv.innerHTML=`🎯:${++score}`;
                     wobonus++;
-                    if(wobonus>=Math.min(Math.floor((rows*cols-2)/2),17)){
+                    if(wobonus>=Math.floor(real/2)){
                         setTimeout(()=>{
                             return gameover(1);
                         },500);
@@ -272,6 +334,4 @@ document.addEventListener("DOMContentLoaded",function(){
             nameform.style.display="block";
         }
     }
-    
 });
-  

@@ -3,16 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="cards.css">
+    <link rel="stylesheet" href="hacker.css">
     <title>Cards Game</title>
 </head>
 <body>
     <form id="nameform">
-        <label for="name">Enter your name: 
+        <label for="name">Name: 
             <input id="name" pattern="^[A-Za-z0-9]+$" placeholder="alphanumeric" required>
-            <input type="submit">
         </label>
-    </form>
+        <label for="rows">Rows:
+            <input id="rows" type="number" min="4" max="8" placeholder="6">
+        </label>
+        <label for="cols">Cols:
+            <input id="cols" type="number" min="4" max="8" placeholder="6">
+        </label>
+        <label for="difficulty">Difficulty:</label>
+        <select id="difficulty" required>
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+        </select>
+        <input type="submit">
+    </form>    
     <button id="view-lb">🏆</button></div>
     <div class="leaderboard">
     </div>
@@ -24,6 +36,6 @@
         </div>
         <div class="grid"></div>
     </div>
-    <script src="cards.js"></script>
+    <script src="hacker.js"></script>
 </body>
 </html>
