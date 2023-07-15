@@ -1,14 +1,18 @@
-document.addEventListener("DOMContentLoaded",function(){
+document.addEventListener("DOMContentLoaded", function(){
+	
     const grid=document.querySelector(".grid");
     const scorediv=document.querySelector(".score");
     const startbtn=document.querySelector(".startbtn");
     const timediv=document.querySelector(".time");
     const viewlb=document.getElementById("view-lb");
     const wrapper=document.querySelector(".wrapper");
-    const lboard=document.querySelector(".leaderboard");
-    const emojis=["😁", "❤️", "👑", "👩🏽‍💻", "🌸", "🌏", "🍎", "💎", "☀️", "🌙", "⭐", "🔍", "📚", "💧", "📱", "🦁", "📷", "😎", "🔥", "✨", "🦋", "💄", "🐮", "⛰️", "🍇", "💛", "🖋️","🌵"];
+    const easyQuerySel=document.querySelector(".leaderboardEasy");
+    const medQuerySel=document.querySelector(".leaderboardMed");
+    const hardQuerySel=document.querySelector(".leaderboardHard");
+    const leaderboardQuerySel=document.querySelector(".leaderboard");
+    const emojis=["😁", "❤️", "👑", "👩🏽‍💻", "🌸", "🌏", "🍎", "💎", "☀️", "🌙", "⭐", "🔍", "📚", "💧", "📱", "🦁", "📷", "😎", "🔥", "✨", "🦋", "💄", "🐮", "⛰️", "🍇", "💛", "🖋️", "🌵"];
     const nameform=document.getElementById("nameform");
-    
+
     let flipped=false;
     let card1=null;
     let card2=null;
@@ -18,106 +22,142 @@ document.addEventListener("DOMContentLoaded",function(){
     let wobonus=0;
     let timeinterval;
     let pausetimeout;
-    let orders=[];``
+    let orders=[];
     let clickok=true;
     let playername="";
     let sorted={};
     let rows;
     let cols;
     let paused=false;
-    let leaderboard;
+    let easyArray=[];
+    let medArray=[];
+    let hardArray=[];
     let cards;
+    let difficulty;
     let real,magic,dummy,bad=0;
 
-    leaderboard=JSON.parse(localStorage.getItem("leaderboard"))||{};
-        
-    Object.keys(leaderboard)
-    .sort((a,b)=>leaderboard[b]-leaderboard[a])
-    .forEach(key=>{
-        sorted[key] = leaderboard[key];
+	//get leaderboards from localStorage
+
+    easyArray=JSON.parse(localStorage.getItem("leaderboardEasy"));
+    if(easyArray===null) easyArray=[];
+
+    medArray=JSON.parse(localStorage.getItem("leaderboardMed"));
+    if(medArray===null) medArray=[];
+
+    hardArray=JSON.parse(localStorage.getItem("leaderboardHard"));
+    if(hardArray===null) hardArray=[];
+
+	//display in descending order of score
+
+    easyArray.sort((a, b)=>b.score - a.score);
+    let easyhtm=`<table border><caption>Easy</caption><tr><th>Name</th><th>Grid</th><th>Score</th></tr>`;
+    easyArray.map((obj)=>{
+        easyhtm +=`<tr><td>${obj.name}</td><td>${obj.grid}</td><td>${obj.score}</td></tr>`;
     });
+    easyhtm +=`</table>`;
+    easyQuerySel.innerHTML=easyhtm;
 
-    let lbhtm=`<table border><tr><th>Name</th><th>Score</th></tr>`;
-    for(const [name,score] of Object.entries(sorted)){
-        lbhtm+=`<tr><td>${name}</td><td>${score}</td></tr>`;
-    }
-    lbhtm+=`</table>`;
-    lboard.innerHTML=lbhtm;
+    medArray.sort((a, b)=>b.score - a.score);
+    let medhtm=`<table border><caption>Medium</caption><tr><th>Name</th><th>Grid</th><th>Score</th></tr>`;
+    medArray.map((obj)=>{
+        medhtm +=`<tr><td>${obj.name}</td><td>${obj.grid}</td><td>${obj.score}</td></tr>`;
+    });
+    medhtm +=`</table>`;
+    medQuerySel.innerHTML=medhtm;
 
-    nameform.addEventListener("submit",function(event){
+    hardArray.sort((a, b)=>b.score - a.score);
+    let hardhtm=`<table border><caption>Hard</caption><tr><th>Name</th><th>Grid</th><th>Score</th></tr>`;
+    hardArray.map((obj)=>{
+        hardhtm +=`<tr><td>${obj.name}</td><td>${obj.grid}</td><td>${obj.score}</td></tr>`;
+    });
+    hardhtm +=`</table>`;
+    hardQuerySel.innerHTML=hardhtm;
+
+	//generate grid on submitting form
+
+    nameform.addEventListener("submit", function(event){
         event.preventDefault();
         if(!started){
             playername=document.getElementById("name").value;
-            rows=document.getElementById("rows").value||6;
-            cols=document.getElementById("cols").value||6;
-            while(orders.length<rows*cols){
-                let ran=Math.floor(Math.random()*rows*cols+1);
+            rows=document.getElementById("rows").value || 6;
+            cols=document.getElementById("cols").value || 6;
+            while(orders.length < rows * cols){
+                let ran=Math.floor(Math.random() * rows * cols + 1);
                 if(!orders.includes(ran)) orders.push(ran);
             }
-            const difficulty=document.getElementById("difficulty").value;
+            difficulty=document.getElementById("difficulty").value;
+
+			//calculate number of real,magic,dummy,bad cards wrt difficulty
+
             switch(difficulty){
                 case "easy":
-                    real=Math.floor(rows*cols*0.8);
-                    magic=Math.floor(rows*cols*0.15);
+                    real=Math.floor(rows * cols * 0.8);
+                    magic=Math.floor(rows * cols * 0.15);
                     break;
                 case "medium":
-                    real=Math.floor(rows*cols*0.85);
-                    magic=Math.floor(rows*cols*0.1);
+                    real=Math.floor(rows * cols * 0.85);
+                    magic=Math.floor(rows * cols * 0.1);
                     break;
                 case "hard":
-                    real=Math.floor(rows*cols*0.8);
-                    magic=Math.floor(rows*cols*0.1);
+                    real=Math.floor(rows * cols * 0.8);
+                    magic=Math.floor(rows * cols * 0.1);
                     bad=2;
                     break;
             }
-            real=real%2?real-1:real;
-            magic=magic>=2?magic:2;
-            magic=magic%2?magic-1:magic;
-            dummy=rows*cols-real-magic-bad;
-    
+            real=real % 2 ? real - 1 : real;
+            magic=magic >=2 ? magic : 2;
+            magic=magic % 2 ? magic - 1 : magic;
+            dummy=rows * cols - real - magic - bad;
+
+			//add cards to html
+
             let htm="";
-            for(let i=0;i<magic;i+=2){
-                htm+=`<div class="card" data-id="100">
-                        <div class="front" style="font-size: ${0.9*Math.min(75/rows,75/cols)}vmin; background-color: lightgreen;">➕</div>
-                        <div class="back" style="font-size: ${0.9*Math.min(75/rows,75/cols)}vmin;">?</div>
-                    </div>`
-                htm+=`<div class="card" data-id="101">
-                        <div class="front" style="font-size: ${0.9*Math.min(75/rows,75/cols)}vmin;  background-color: lightgreen;">⏰</div>
-                        <div class="back" style="font-size: ${0.9*Math.min(75/rows,75/cols)}vmin;">?</div>
-                    </div>`    
+            for(let i=0; i < magic; i +=2){
+                htm +=`<div class="card" data-id="100">
+                            <div class="front" style="font-size: ${0.9 * Math.min(75 / rows, 75 / cols)}vmin; background-color: lightgreen;">➕</div>
+                            <div class="back" style="font-size: ${0.9 * Math.min(75 / rows, 75 / cols)}vmin;">?</div>
+                    	</div>`;
+                htm +=`<div class="card" data-id="101">
+                        	<div class="front" style="font-size: ${0.9 * Math.min(75 / rows, 75 / cols)}vmin; background-color: lightgreen;">⏰</div>
+                        	<div class="back" style="font-size: ${0.9 * Math.min(75 / rows, 75 / cols)}vmin;">?</div>
+                    	</div>`;
             }
-            for(let i=2; i<real+2;i++){
-                htm+=`<div class="card" data-id="${Math.floor(i/2)}">
-                        <div class="front" style="font-size: ${0.9*Math.min(75/rows,75/cols)}vmin;">${emojis[Math.floor(i/2)-1]}</div>
-                        <div class="back" style="font-size: ${0.9*Math.min(75/rows,75/cols)}vmin;">?</div>
-                    </div>`;
+
+            for(let i=2; i < real + 2; i++){
+                htm +=`<div class="card" data-id="${Math.floor(i / 2)}">
+                        	<div class="front" style="font-size: ${0.9 * Math.min(75 / rows, 75 / cols)}vmin;">${emojis[Math.floor(i / 2) - 1]}</div>
+                        	<div class="back" style="font-size: ${0.9 * Math.min(75 / rows, 75 / cols)}vmin;">?</div>
+                    	</div>`;
             }
-            for(let i=0;i<dummy;i++){
-                htm+=`<div class="card" data-id="99">
-                        <div class="front" style="font-size: ${0.9*Math.min(75/rows,75/cols)}vmin;"></div>
-                        <div class="back" style="font-size: ${0.9*Math.min(75/rows,75/cols)}vmin;">?</div>
-                    </div>`;
+
+            for(let i=0; i < dummy; i++){
+                htm +=`<div class="card" data-id="99">
+                        	<div class="front" style="font-size: ${0.9 * Math.min(75 / rows, 75 / cols)}vmin;"></div>
+                        	<div class="back" style="font-size: ${0.9 * Math.min(75 / rows, 75 / cols)}vmin;">?</div>
+                        </div>`;
             }
-            for(let i=0;i<bad;i+=2){
-                htm+=`<div class="card" data-id="102">
-                        <div class="front" style="font-size: ${0.9*Math.min(75/rows,75/cols)}vmin; background-color: red;">➕</div>
-                        <div class="back" style="font-size: ${0.9*Math.min(75/rows,75/cols)}vmin;">?</div>
-                    </div>`
-                htm+=`<div class="card" data-id="103">
-                        <div class="front" style="font-size: ${0.9*Math.min(75/rows,75/cols)}vmin;  background-color: red;">⏰</div>
-                        <div class="back" style="font-size: ${0.9*Math.min(75/rows,75/cols)}vmin;">?</div>
-                    </div>`    
+
+            for(let i=0; i < bad; i +=2){
+                htm +=`<div class="card" data-id="102">
+                        	<div class="front" style="font-size: ${0.9 * Math.min(75 / rows, 75 / cols)}vmin; background-color: red;">➕</div>
+                        	<div class="back" style="font-size: ${0.9 * Math.min(75 / rows, 75 / cols)}vmin;">?</div>
+                        </div>`;
+                htm +=`<div class="card" data-id="103">
+                        	<div class="front" style="font-size: ${0.9 * Math.min(75 / rows, 75 / cols)}vmin; background-color: red;">⏰</div>
+                        	<div class="back" style="font-size: ${0.9 * Math.min(75 / rows, 75 / cols)}vmin;">?</div>
+                        </div>`;
             }
+
             grid.innerHTML=htm;
             grid.style.height=`75vmin`;
             grid.style.width=`75vmin`;
             cards=document.querySelectorAll(".card");
             let ord=0;
             cards.forEach((card)=>{
-                card.addEventListener("click",flipfn);
+                card.addEventListener("click", flipfn);
                 card.style.order=orders[ord++];
-                card.style.height=`${75/rows}vmin`;
-                card.style.width=`${75/cols}vmin`;
+                card.style.height=`${75 / rows}vmin`;
+                card.style.width=`${75 / cols}vmin`;
             });
         }
         else return;
@@ -125,130 +165,179 @@ document.addEventListener("DOMContentLoaded",function(){
 
     function gameover(num){
         clearInterval(timeinterval);
-        if(playername in leaderboard) leaderboard[playername]=Math.max(score,leaderboard[playername]);
-        else leaderboard[playername]=score;
-        localStorage.setItem("leaderboard",JSON.stringify(leaderboard));
-        setTimeout(() => {
-            cards.forEach(card => {
-                this.removeEventListener("click",flipfn);
+		sound(500);
+        const leaderboardObj={
+            name: playername,
+            grid: `${rows}x${cols}`,
+            diff: difficulty,
+            score: score,
+        };
+
+		//setItems of leaderboards in localStorage
+        if(difficulty==="easy"){
+            easyArray.push(leaderboardObj);
+            localStorage.setItem("leaderboardEasy", JSON.stringify(easyArray));
+        }
+        else if(difficulty==="medium"){
+            medArray.push(leaderboardObj);
+            localStorage.setItem("leaderboardMed", JSON.stringify(medArray));
+        }
+        else if(difficulty==="hard"){
+            hardArray.push(leaderboardObj);
+            localStorage.setItem("leaderboardHard", JSON.stringify(hardArray));
+        }
+
+		//reveal all cards in the end
+
+        setTimeout(()=>{
+            cards.forEach((card)=>{
+                this.removeEventListener("click", flipfn);
                 card.classList.add("flip");
-            });            
+            });
         }, 501);
-        setTimeout(() => {
+        setTimeout(()=>{
             switch(num){
                 case 1:
-                    alert(`Congratulations! You win.\nTime taken: ${60-time}s`);
+                    alert(`Congratulations! You win.\nTime taken: ${60 - time}s`);
                     break;
                 case 0:
                     alert(`Time Up! Your score:${score}`);
                     break;
             }
             location.reload();
-            
         }, 1002);
     }
 
+	//randomly shuffle cards which are not locked
+
     function shuffle(){
-        for (let i=orders.length-1;i>0;i--){
-            const randomIndex=Math.floor(Math.random()*(i+1));
-            [orders[i],orders[randomIndex]]=[orders[randomIndex],orders[i]];
+        for(let i=orders.length - 1; i > 0; i--){
+            const randomIndex=Math.floor(Math.random() *(i + 1));
+            [orders[i], orders[randomIndex]]=[orders[randomIndex], orders[i]];
         }
         let x=0;
         cards.forEach((card)=>{
-            if(!card.classList.contains("locked")) card.style.order = orders[x++];
+            if(!card.classList.contains("locked")) card.style.order=orders[x++];
         });
     }
-  
-    function flipfn(){
-        if(started&&clickok&&time){
 
-            if(this===card1) return;
-            if(card1&&card2) return;
+	//sound generation
+
+	function sound(time){
+		let ctx = new AudioContext();
+		let osc = ctx.createOscillator();
+		osc.type = "sine";
+		osc.frequency.value = 800;
+		osc.connect(ctx.destination);
+		osc.start();
+		setTimeout(function(){
+			osc.stop();
+		},time);
+	}
+
+    function flipfn(){
+        if(started && clickok && time){
+            if(this===card1) return;//clicking on same card case
+            if(card1 && card2) return;//if the are not null
+
+			sound(100);
 
             this.classList.add("flip");
 
+			//dummy card
             if(this.dataset.id==="99"){
-                this.removeEventListener("click",flipfn);
+                this.removeEventListener("click", flipfn);
                 this.classList.add("locked");
-                for(let i=0;i<orders.length;i++){
-                    if(!(orders[i]-this.style.order)){
-                        orders.splice(i--,1);
+                for(let i=0; i < orders.length; i++){
+                    if(!(orders[i] - this.style.order)){
+                        orders.splice(i, 1);
                     }
                 }
                 return;
             }
 
+			//score powerup
             else if(this.dataset.id==="100"){
-                if(bad) score+=2;
+                if(bad) score +=2;
                 else score++;
                 scorediv.innerHTML=`🎯:${score}`;
                 clickok=false;
-                setTimeout(()=> {
+                setTimeout(()=>{
                     this.classList.remove("flip");
                     setTimeout(()=>{
                         shuffle();
                         clickok=true;
-                    },300);
+                    }, 300);
                 }, 500);
                 return;
-            }              
+            }
+
+			//time freezer
             else if(this.dataset.id==="101"){
                 clickok=false;
-                setTimeout(()=> {
+                setTimeout(()=>{
                     this.classList.remove("flip");
                     setTimeout(()=>{
                         shuffle();
                         clickok=true;
-                    },300);
+                    }, 300);
                 }, 500);
-                if(!paused&&time){
+                if(!paused && time){
                     paused=true;
                     clearInterval(timeinterval);
-                    pausetimeout=setTimeout(() => {
+                    pausetimeout=setTimeout(()=>{
                         timeinterval=setInterval(()=>{
-                        if(--time<0) return gameover(0);
-                        timediv.innerHTML=`⏰:${time}`;
-                        },1000);
+                            if(--time < 0) return gameover(0);
+                            timediv.innerHTML=`⏰:${time}`;
+                        }, 1000);
                         paused=false;
-                    },5000);
+                    }, 5000);
                 }
+				//when a second time freeze card comes when time is already frozen, fresh 5 seconds freeze
                 else if(paused){
                     clearTimeout(pausetimeout);
-                    pausetimeout=setTimeout(() => {
+                    pausetimeout=setTimeout(()=>{
                         timeinterval=setInterval(()=>{
-                        if(--time<0) return gameover(0);
-                        timediv.innerHTML=`⏰:${time}`;
-                        },1000);
+                            if(--time < 0) return gameover(0);
+                            timediv.innerHTML=`⏰:${time}`;
+                        }, 1000);
                         paused=false;
-                    },5000);
-
+                    }, 5000);
                 }
                 return;
             }
 
+			//negative score card
             else if(this.dataset.id==="102"){
                 if(score) score--;
                 scorediv.innerHTML=`🎯:${score}`;
                 clickok=false;
-                setTimeout(()=> {
+                setTimeout(()=>{
                     this.classList.remove("flip");
                     setTimeout(()=>{
                         shuffle();
                         clickok=true;
-                    },300);
+                    }, 300);
                 }, 500);
                 return;
-            }              
+            }
+
+			//negative time card
             else if(this.dataset.id==="103"){
                 clickok=false;
-                setTimeout(()=> {
+                setTimeout(()=>{
                     this.classList.remove("flip");
                     setTimeout(()=>{
                         shuffle();
                         clickok=true;
-                    },300);
+                    }, 300);
                 }, 500);
-                time-=3;
+                time -=3;
+                if(time <=0){
+                    time=0;
+                    timediv.innerHTML=`⏰:${time}`;
+                    return gameover(0);
+                }
                 return;
             }
 
@@ -256,50 +345,59 @@ document.addEventListener("DOMContentLoaded",function(){
                 flipped=true;
                 card1=this;
                 card1.classList.add("locked");
+				for(let i=0; i < orders.length; i++){
+					if(!(orders[i] - card1.style.order)){
+						orders.splice(i, 1);
+					}
+				}
                 return;
             }
 
             card2=this;
             flipped=false;
 
+			//matching
             if(card1.dataset.id===card2.dataset.id){
-                if(card1&&card2){
-                    card1.removeEventListener("click",flipfn);
-                    card2.removeEventListener("click",flipfn);
+                if(card1 && card2){
+                    card1.removeEventListener("click", flipfn);
+                    card2.removeEventListener("click", flipfn);
                     card1.classList.add("locked");
                     card2.classList.add("locked");
-                    for(let i=0;i<orders.length;i++){
-                        if(!(orders[i]-card1.style.order)){
-                            orders.splice(i--,1);
+                    for(let i=0; i < orders.length; i++){
+                        if(!(orders[i] - card1.style.order)){
+                            orders.splice(i--, 1);
                         }
-                        if(!(orders[i]-card2.style.order)){
-                            orders.splice(i--,1);
+                        if(!(orders[i] - card2.style.order)){
+                            orders.splice(i--, 1);
                         }
                     }
                     scorediv.innerHTML=`🎯:${++score}`;
                     wobonus++;
-                    if(wobonus>=Math.floor(real/2)){
+                    if(wobonus >=Math.floor(real / 2)){
                         setTimeout(()=>{
                             return gameover(1);
-                        },500);
+                        }, 500);
                     }
                 }
                 card1=null;
                 card2=null;
             }
-            else{
+
+			//not matching
+            else {
                 clickok=false;
                 card1.classList.remove("locked");
+				orders.push(card1.style.order);
                 setTimeout(()=>{
                     card1.classList.remove("flip");
                     card2.classList.remove("flip");
                     setTimeout(()=>{
                         shuffle();
                         clickok=true;
-                    },300);
+                    }, 300);
                     card1=null;
                     card2=null;
-                },500);
+                }, 500);
             }
         }
     }
@@ -313,25 +411,27 @@ document.addEventListener("DOMContentLoaded",function(){
             started=true;
             startbtn.innerHTML="Restart";
             timeinterval=setInterval(()=>{
-                if(--time<0) return gameover(0);
+                if(--time < 0) return gameover(0);
                 timediv.innerHTML=`⏰:${time}`;
-            },1000);
+            }, 1000);
         }
-        else{
-            alert("Enter player name!");
+        else {
+            alert("Enter details and submit!");
         }
-    }
-    
+    };
+
+	//on clicking leaderboard, show it and hide the rest, vice versa
     viewlb.onclick=()=>{
-        if(lboard.style.display==="none"){
-            lboard.style.display="block";
+        if(leaderboardQuerySel.style.display==="none"){
+            leaderboardQuerySel.style.display="flex";
+            leaderboardQuerySel.style.justifyContent="space-around";
             wrapper.style.display="none";
             nameform.style.display="none";
         }
-        else{
-            lboard.style.display="none";
+        else {
+            leaderboardQuerySel.style.display="none";
             wrapper.style.display="block";
             nameform.style.display="block";
         }
-    }
+    };
 });

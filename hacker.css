@@ -64,14 +64,15 @@ html, body {
     transform: rotateY(180deg);
 }
 
-.leaderboard{
-    display: none;
-}
-
 #view-lb{
     margin-top: 2%;
     margin-bottom: 2%;
 }
 .card.locked {
     pointer-events: none;
+}
+
+.leaderboard{
+    display: none;
+    width: 100vw;
 }
