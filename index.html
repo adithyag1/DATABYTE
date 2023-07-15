@@ -10,7 +10,7 @@
     <h1>DATABYTE TASK 1</h1>
     <form id="nameform">
         <label for="name">Name: 
-            <input id="name" pattern="^[A-Za-z0-9]+$" placeholder="alphanumeric" required>
+            <input id="name" minlength="4" maxlength="30" pattern="^[A-Za-z0-9]+$" placeholder="alphanumeric" required>
         </label>
         <label for="rows">Rows:
             <input id="rows" type="number" min="4" max="8" placeholder="6">

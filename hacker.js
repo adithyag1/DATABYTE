@@ -52,25 +52,25 @@ document.addEventListener("DOMContentLoaded", function(){
     easyArray.sort((a, b)=>b.score - a.score);
     let easyhtm=`<table border><caption>Easy</caption><tr><th>Name</th><th>Grid</th><th>Score</th></tr>`;
     easyArray.map((obj)=>{
-        easyhtm +=`<tr><td>${obj.name}</td><td>${obj.grid}</td><td>${obj.score}</td></tr>`;
+        easyhtm+=`<tr><td>${obj.name}</td><td>${obj.grid}</td><td>${obj.score}</td></tr>`;
     });
-    easyhtm +=`</table>`;
+    easyhtm+=`</table>`;
     easyQuerySel.innerHTML=easyhtm;
 
     medArray.sort((a, b)=>b.score - a.score);
     let medhtm=`<table border><caption>Medium</caption><tr><th>Name</th><th>Grid</th><th>Score</th></tr>`;
     medArray.map((obj)=>{
-        medhtm +=`<tr><td>${obj.name}</td><td>${obj.grid}</td><td>${obj.score}</td></tr>`;
+        medhtm+=`<tr><td>${obj.name}</td><td>${obj.grid}</td><td>${obj.score}</td></tr>`;
     });
-    medhtm +=`</table>`;
+    medhtm+=`</table>`;
     medQuerySel.innerHTML=medhtm;
 
     hardArray.sort((a, b)=>b.score - a.score);
     let hardhtm=`<table border><caption>Hard</caption><tr><th>Name</th><th>Grid</th><th>Score</th></tr>`;
     hardArray.map((obj)=>{
-        hardhtm +=`<tr><td>${obj.name}</td><td>${obj.grid}</td><td>${obj.score}</td></tr>`;
+        hardhtm+=`<tr><td>${obj.name}</td><td>${obj.grid}</td><td>${obj.score}</td></tr>`;
     });
-    hardhtm +=`</table>`;
+    hardhtm+=`</table>`;
     hardQuerySel.innerHTML=hardhtm;
 
 	//generate grid on submitting form
@@ -81,8 +81,8 @@ document.addEventListener("DOMContentLoaded", function(){
             playername=document.getElementById("name").value;
             rows=document.getElementById("rows").value || 6;
             cols=document.getElementById("cols").value || 6;
-            while(orders.length < rows * cols){
-                let ran=Math.floor(Math.random() * rows * cols + 1);
+            while(orders.length < rows*cols){
+                let ran=Math.floor(Math.random()*rows*cols + 1);
                 if(!orders.includes(ran)) orders.push(ran);
             }
             difficulty=document.getElementById("difficulty").value;
@@ -91,60 +91,60 @@ document.addEventListener("DOMContentLoaded", function(){
 
             switch(difficulty){
                 case "easy":
-                    real=Math.floor(rows * cols * 0.8);
-                    magic=Math.floor(rows * cols * 0.15);
+                    real=Math.floor(rows*cols*0.8);
+                    magic=Math.floor(rows*cols*0.15);
                     break;
                 case "medium":
-                    real=Math.floor(rows * cols * 0.85);
-                    magic=Math.floor(rows * cols * 0.1);
+                    real=Math.floor(rows*cols*0.85);
+                    magic=Math.floor(rows*cols*0.1);
                     break;
                 case "hard":
-                    real=Math.floor(rows * cols * 0.8);
-                    magic=Math.floor(rows * cols * 0.1);
+                    real=Math.floor(rows*cols*0.8);
+                    magic=Math.floor(rows*cols*0.1);
                     bad=2;
                     break;
             }
             real=real % 2 ? real - 1 : real;
             magic=magic >=2 ? magic : 2;
             magic=magic % 2 ? magic - 1 : magic;
-            dummy=rows * cols - real - magic - bad;
+            dummy=rows*cols - real - magic - bad;
 
 			//add cards to html
 
             let htm="";
-            for(let i=0; i < magic; i +=2){
-                htm +=`<div class="card" data-id="100">
-                            <div class="front" style="font-size: ${0.9 * Math.min(75 / rows, 75 / cols)}vmin; background-color: lightgreen;">➕</div>
-                            <div class="back" style="font-size: ${0.9 * Math.min(75 / rows, 75 / cols)}vmin;">?</div>
+            for(let i=0; i < magic; i+=2){
+                htm+=`<div class="card" data-id="100">
+                            <div class="front" style="font-size: ${0.9*Math.min(75 / rows, 75 / cols)}vmin; background-color: lightgreen;">➕</div>
+                            <div class="back" style="font-size: ${0.9*Math.min(75 / rows, 75 / cols)}vmin;">?</div>
                     	</div>`;
-                htm +=`<div class="card" data-id="101">
-                        	<div class="front" style="font-size: ${0.9 * Math.min(75 / rows, 75 / cols)}vmin; background-color: lightgreen;">⏰</div>
-                        	<div class="back" style="font-size: ${0.9 * Math.min(75 / rows, 75 / cols)}vmin;">?</div>
+                htm+=`<div class="card" data-id="101">
+                        	<div class="front" style="font-size: ${0.9*Math.min(75 / rows, 75 / cols)}vmin; background-color: lightgreen;">⏰</div>
+                        	<div class="back" style="font-size: ${0.9*Math.min(75 / rows, 75 / cols)}vmin;">?</div>
                     	</div>`;
             }
 
             for(let i=2; i < real + 2; i++){
-                htm +=`<div class="card" data-id="${Math.floor(i / 2)}">
-                        	<div class="front" style="font-size: ${0.9 * Math.min(75 / rows, 75 / cols)}vmin;">${emojis[Math.floor(i / 2) - 1]}</div>
-                        	<div class="back" style="font-size: ${0.9 * Math.min(75 / rows, 75 / cols)}vmin;">?</div>
+                htm+=`<div class="card" data-id="${Math.floor(i / 2)}">
+                        	<div class="front" style="font-size: ${0.9*Math.min(75 / rows, 75 / cols)}vmin;">${emojis[Math.floor(i / 2) - 1]}</div>
+                        	<div class="back" style="font-size: ${0.9*Math.min(75 / rows, 75 / cols)}vmin;">?</div>
                     	</div>`;
             }
 
             for(let i=0; i < dummy; i++){
-                htm +=`<div class="card" data-id="99">
-                        	<div class="front" style="font-size: ${0.9 * Math.min(75 / rows, 75 / cols)}vmin;"></div>
-                        	<div class="back" style="font-size: ${0.9 * Math.min(75 / rows, 75 / cols)}vmin;">?</div>
+                htm+=`<div class="card" data-id="99">
+                        	<div class="front" style="font-size: ${0.9*Math.min(75 / rows, 75 / cols)}vmin;"></div>
+                        	<div class="back" style="font-size: ${0.9*Math.min(75 / rows, 75 / cols)}vmin;">?</div>
                         </div>`;
             }
 
-            for(let i=0; i < bad; i +=2){
-                htm +=`<div class="card" data-id="102">
-                        	<div class="front" style="font-size: ${0.9 * Math.min(75 / rows, 75 / cols)}vmin; background-color: red;">➕</div>
-                        	<div class="back" style="font-size: ${0.9 * Math.min(75 / rows, 75 / cols)}vmin;">?</div>
+            for(let i=0; i < bad; i+=2){
+                htm+=`<div class="card" data-id="102">
+                        	<div class="front" style="font-size: ${0.9*Math.min(75 / rows, 75 / cols)}vmin; background-color: red;">➕</div>
+                        	<div class="back" style="font-size: ${0.9*Math.min(75 / rows, 75 / cols)}vmin;">?</div>
                         </div>`;
-                htm +=`<div class="card" data-id="103">
-                        	<div class="front" style="font-size: ${0.9 * Math.min(75 / rows, 75 / cols)}vmin; background-color: red;">⏰</div>
-                        	<div class="back" style="font-size: ${0.9 * Math.min(75 / rows, 75 / cols)}vmin;">?</div>
+                htm+=`<div class="card" data-id="103">
+                        	<div class="front" style="font-size: ${0.9*Math.min(75 / rows, 75 / cols)}vmin; background-color: red;">⏰</div>
+                        	<div class="back" style="font-size: ${0.9*Math.min(75 / rows, 75 / cols)}vmin;">?</div>
                         </div>`;
             }
 
@@ -165,7 +165,15 @@ document.addEventListener("DOMContentLoaded", function(){
 
     function gameover(num){
         clearInterval(timeinterval);
-		sound(500);
+		switch(num){
+			case 1:
+				sound(1400,500);
+				break;
+			case 0:
+				sound(400,500);
+				break;
+		}
+
         const leaderboardObj={
             name: playername,
             grid: `${rows}x${cols}`,
@@ -223,11 +231,11 @@ document.addEventListener("DOMContentLoaded", function(){
 
 	//sound generation
 
-	function sound(time){
-		let ctx = new AudioContext();
-		let osc = ctx.createOscillator();
-		osc.type = "sine";
-		osc.frequency.value = 800;
+	function sound(freq,time){
+		let ctx=new AudioContext();
+		let osc=ctx.createOscillator();
+		osc.type="sine";
+		osc.frequency.value=freq;
 		osc.connect(ctx.destination);
 		osc.start();
 		setTimeout(function(){
@@ -236,16 +244,15 @@ document.addEventListener("DOMContentLoaded", function(){
 	}
 
     function flipfn(){
-        if(started && clickok && time){
+        if(started&&clickok&&time){
             if(this===card1) return;//clicking on same card case
-            if(card1 && card2) return;//if the are not null
-
-			sound(100);
+            if(card1&&card2) return;//if the are not null
 
             this.classList.add("flip");
 
 			//dummy card
             if(this.dataset.id==="99"){
+				sound(800,100);
                 this.removeEventListener("click", flipfn);
                 this.classList.add("locked");
                 for(let i=0; i < orders.length; i++){
@@ -258,7 +265,8 @@ document.addEventListener("DOMContentLoaded", function(){
 
 			//score powerup
             else if(this.dataset.id==="100"){
-                if(bad) score +=2;
+				sound(1400,300);
+                if(bad) score+=2;
                 else score++;
                 scorediv.innerHTML=`🎯:${score}`;
                 clickok=false;
@@ -274,6 +282,7 @@ document.addEventListener("DOMContentLoaded", function(){
 
 			//time freezer
             else if(this.dataset.id==="101"){
+				sound(1400,300);
                 clickok=false;
                 setTimeout(()=>{
                     this.classList.remove("flip");
@@ -282,7 +291,7 @@ document.addEventListener("DOMContentLoaded", function(){
                         clickok=true;
                     }, 300);
                 }, 500);
-                if(!paused && time){
+                if(!paused&&time){
                     paused=true;
                     clearInterval(timeinterval);
                     pausetimeout=setTimeout(()=>{
@@ -309,6 +318,7 @@ document.addEventListener("DOMContentLoaded", function(){
 
 			//negative score card
             else if(this.dataset.id==="102"){
+				sound(400,300);
                 if(score) score--;
                 scorediv.innerHTML=`🎯:${score}`;
                 clickok=false;
@@ -324,6 +334,7 @@ document.addEventListener("DOMContentLoaded", function(){
 
 			//negative time card
             else if(this.dataset.id==="103"){
+				sound(400,300);
                 clickok=false;
                 setTimeout(()=>{
                     this.classList.remove("flip");
@@ -342,6 +353,7 @@ document.addEventListener("DOMContentLoaded", function(){
             }
 
             if(!flipped){
+				sound(800,100);
                 flipped=true;
                 card1=this;
                 card1.classList.add("locked");
@@ -358,7 +370,8 @@ document.addEventListener("DOMContentLoaded", function(){
 
 			//matching
             if(card1.dataset.id===card2.dataset.id){
-                if(card1 && card2){
+				sound(1400,300);
+                if(card1&&card2){
                     card1.removeEventListener("click", flipfn);
                     card2.removeEventListener("click", flipfn);
                     card1.classList.add("locked");
@@ -385,6 +398,7 @@ document.addEventListener("DOMContentLoaded", function(){
 
 			//not matching
             else {
+				sound(800,100);
                 clickok=false;
                 card1.classList.remove("locked");
 				orders.push(card1.style.order);
