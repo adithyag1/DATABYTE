@@ -1,6 +1,9 @@
 # databyte-task1
 
 This is a cards game website done for the first task of induction into DataByte club, NITT
+
+This is the hacker mode along with 2 brownie point features implemented (leaderboard and difficulty level).
+
 It has a grid where the user decides number of rows and columns.
 There are three difiiculty levels easy, medium and hard.
 
