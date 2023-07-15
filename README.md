@@ -22,6 +22,8 @@ Real cards have visuals behind them. Emojis are used here.
 When a card is clicked, its content is revealed.
 This is done by using transform property in css. The card is rotated by 180 degrees along y axis.
 
+Since question marks and emojis are text and utf characters, select is disabled in css.
+
 For real cards, If two images are the same, the player scores a point.
 If they are different, the shuffle function is called, which randomly shuffles all cards which are not locked.
 Cards which have already been revealed and dummy cards are considered as locked. "locked" is added to their classList to identify this.
