@@ -196,14 +196,16 @@ document.addEventListener("DOMContentLoaded", function(){
         }
 
 		//reveal all cards in the end
-
+        cards.forEach((card)=>{
+            this.removeEventListener("click", flipfn);
+        });
         setTimeout(()=>{
-            cards.forEach((card)=>{
-                this.removeEventListener("click", flipfn);
-                card.classList.add("flip");
-            });
+			cards.forEach((card)=>{
+				card.classList.add("flip");
+			})
         }, 501);
         setTimeout(()=>{
+			
             switch(num){
                 case 1:
                     alert(`Congratulations! You win.\nTime taken: ${60 - time}s`);
