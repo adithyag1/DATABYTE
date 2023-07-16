@@ -2,7 +2,7 @@
 
 This is a cards game website done for the first task of induction into DataByte club, NITT
 
-This is the hacker mode along with 2 brownie point features implemented (leaderboard and difficulty level).
+This is the hacker mode along with 3 brownie point features implemented (leaderboard, difficulty level and mobile responsive).
 
 It has a grid where the user decides number of rows and columns.
 There are three difiiculty levels easy, medium and hard.
