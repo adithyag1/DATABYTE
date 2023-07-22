@@ -183,16 +183,37 @@ document.addEventListener("DOMContentLoaded", function(){
 
 		//setItems of leaderboards in localStorage
         if(difficulty==="easy"){
-            easyArray.push(leaderboardObj);
-            localStorage.setItem("leaderboardEasy", JSON.stringify(easyArray));
+            const filtered=easyArray.filter((obj)=>obj.name==playername&&obj.grid===`${rows}x${cols}`);
+            if(filtered.length>0){
+                let index=easyArray.indexOf(filtered[0]);
+                easyArray[index].score=Math.max(score,easyArray[index].score);
+            }
+            else{
+                easyArray.push(leaderboardObj);
+                localStorage.setItem("leaderboardEasy", JSON.stringify(easyArray));
+            }
         }
         else if(difficulty==="medium"){
-            medArray.push(leaderboardObj);
-            localStorage.setItem("leaderboardMed", JSON.stringify(medArray));
+            const filteredMed = medArray.filter((obj, ind) => obj.name === playername && obj.grid === `${rows}x${cols}`);
+            if (filteredMed.length > 0) {
+                let index = medArray.indexOf(filteredMed[0]);
+                medArray[index].score = Math.max(score, medArray[index].score);
+            }
+            else {
+                medArray.push(leaderboardObj);
+                localStorage.setItem("leaderboardMed", JSON.stringify(medArray));
+            }
         }
         else if(difficulty==="hard"){
-            hardArray.push(leaderboardObj);
-            localStorage.setItem("leaderboardHard", JSON.stringify(hardArray));
+            const filteredHard = hardArray.filter((obj, ind) => obj.name === playername && obj.grid === `${rows}x${cols}`);
+            if (filteredHard.length > 0) {
+                let index = hardArray.indexOf(filteredHard[0]);
+                hardArray[index].score = Math.max(score, hardArray[index].score);
+            }
+            else {
+                hardArray.push(leaderboardObj);
+                localStorage.setItem("leaderboardHard", JSON.stringify(hardArray));
+            }
         }
 
 		//reveal all cards in the end
